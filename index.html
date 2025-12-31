@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 - Vivid Celebration by Nishu</title>
+    <title>2026 Celebration - Nishu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Great+Vibes&family=Montserrat:wght@100;400;700&display=swap');
@@ -18,7 +18,7 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Cinematic Atmosphere with Deep Indigo & Purple */
+        /* Deep Cinematic Atmosphere */
         .sky-bg {
             position: absolute;
             inset: 0;
@@ -30,53 +30,6 @@
             position: absolute;
             inset: 0;
             z-index: 5;
-            pointer-events: none;
-        }
-
-        #ui-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 60px;
-            z-index: 30;
-        }
-
-        /* Rocket Launch Button */
-        .rocket-btn {
-            pointer-events: auto;
-            width: 85px;
-            height: 85px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 30px rgba(0,0,0,0.6);
-        }
-
-        .rocket-btn svg {
-            width: 40px;
-            height: 40px;
-            fill: #fff;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-        }
-
-        .rocket-btn:hover {
-            transform: scale(1.1) translateY(-5px);
-            border-color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .rocket-btn.launched {
-            transform: translateY(200px) scale(0);
-            opacity: 0;
             pointer-events: none;
         }
 
@@ -98,7 +51,7 @@
             transform: scale(1);
         }
 
-        /* COLORFUL HAPPY NEW YEAR TEXT */
+        /* COLORFUL GRADIENT TEXT */
         .vivid-title {
             font-weight: 700;
             text-transform: uppercase;
@@ -115,7 +68,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: moveGradient 4s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
         }
 
         @keyframes moveGradient {
@@ -128,37 +81,28 @@
             font-weight: 900;
             color: #ffffff;
             line-height: 0.9;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
             margin-top: 10px;
         }
 
         .signature {
             font-family: 'Great Vibes', cursive;
             color: #ffd700;
-            font-size: 3.2rem;
+            font-size: 3.5rem;
             margin-top: 15px;
             opacity: 0;
             transition: all 2s ease 1s;
-            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.7));
         }
 
         #wish-box.visible .signature {
             opacity: 1;
         }
 
-        .label-hint {
-            color: white;
-            letter-spacing: 0.6em;
-            text-transform: uppercase;
-            font-weight: 200;
-            opacity: 0.5;
-            font-size: 0.7rem;
-            margin-top: 15px;
-        }
-
         @media (max-width: 768px) {
-            .year-2026 { font-size: 4.8rem; }
+            .year-2026 { font-size: 5rem; }
             .vivid-title { letter-spacing: 0.3em; font-size: 0.9rem; }
+            .signature { font-size: 2.8rem; }
         }
     </style>
 </head>
@@ -173,23 +117,14 @@
         <p class="signature">from Nishu</p>
     </div>
 
-    <div id="ui-overlay">
-        <button id="igniteBtn" class="rocket-btn">
-            <svg viewBox="0 0 24 24"><path d="M12,2.5C12,2.5 9,7 9,11C9,13 10,14.5 12,14.5C14,14.5 15,13 15,11C15,7 12,2.5 12,2.5M12,16.5C11,16.5 7,17.5 7,20C7,21 8,21.5 12,21.5C16,21.5 17,21 17,20C17,17.5 13,16.5 12,16.5Z"/></svg>
-        </button>
-        <p id="hint" class="label-hint">Ignite the Year</p>
-    </div>
-
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const igniteBtn = document.getElementById('igniteBtn');
         const wishBox = document.getElementById('wish-box');
 
         let width, height;
         let particles = [];
         let rocket = null;
-        let isCelebrating = false;
         let flareMode = false;
 
         const VIVID_COLORS = ['#FF3366', '#33FFCC', '#FFCC33', '#9933FF', '#33CCFF', '#FF9933', '#FFFFFF'];
@@ -239,14 +174,15 @@
         }
 
         class Rocket {
-            constructor(startX) {
-                this.x = startX;
+            constructor() {
+                this.x = width / 2;
                 this.y = height;
                 this.targetX = width / 2;
                 this.targetY = height / 2;
                 const dx = this.targetX - this.x;
                 const dy = this.targetY - this.y;
-                this.steps = 50; 
+                // Move to middle in approx 1.5 seconds
+                this.steps = 70; 
                 this.vx = dx / this.steps;
                 this.vy = dy / this.steps;
                 this.stepCount = 0;
@@ -257,10 +193,10 @@
                 this.y += this.vy;
                 this.stepCount++;
 
-                // Colorful launch sparks
-                for(let i=0; i<3; i++) {
+                // Fire trail with colors
+                for(let i=0; i<4; i++) {
                     const c = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
-                    particles.push(new Particle(this.x, this.y, c, Math.random()*2, Math.PI/2, 0.98, 0.05, 0.06, 1.2));
+                    particles.push(new Particle(this.x, this.y, c, Math.random()*2, Math.PI/2, 0.98, 0.05, 0.05, 1.2));
                 }
 
                 if (this.stepCount >= this.steps && !this.exploded) this.explode();
@@ -268,24 +204,23 @@
             explode() {
                 this.exploded = true;
                 
-                // MULTI-COLOR RAINBOW BLOOM
+                // MULTI-COLOR SPARKLE BLAST IN MIDDLE
                 for(let j=0; j<5; j++) {
                     setTimeout(() => {
-                        const count = 180;
-                        const layerColor = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
+                        const count = 220;
                         for(let i=0; i<count; i++) {
                             const angle = Math.random() * Math.PI * 2;
-                            const speed = Math.random() * (14 - j*2) + 3;
-                            // Mix of layer color and randoms
-                            const pColor = Math.random() > 0.5 ? layerColor : VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
-                            particles.push(new Particle(this.x, this.y, pColor, speed, angle, 0.94, 0.1, 0.006 + Math.random()*0.006, 1.5));
+                            const speed = Math.random() * (15 - j*2) + 3;
+                            const pColor = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
+                            particles.push(new Particle(this.x, this.y, pColor, speed, angle, 0.94, 0.1, 0.005 + Math.random()*0.005, 1.6));
                         }
-                    }, j * 200);
+                    }, j * 250);
                 }
                 
                 setTimeout(() => {
                     wishBox.classList.add('visible');
-                    setTimeout(() => { flareMode = true; }, 1200);
+                    // Start Fire Glares after name is revealed
+                    setTimeout(() => { flareMode = true; }, 1500);
                 }, 800);
             }
             draw() {
@@ -294,7 +229,7 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 4, 0, Math.PI*2);
                 ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 25;
                 ctx.shadowColor = '#fff';
                 ctx.fill();
                 ctx.restore();
@@ -302,31 +237,27 @@
         }
 
         function createAmbientFlares() {
-            if(particles.length < 4000) {
+            if(particles.length < 4500) {
                 const x = Math.random() * width;
                 const y = Math.random() * (height * 0.8);
                 const color = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
-                const isBurst = Math.random() > 0.95;
-                const count = isBurst ? 70 : 3;
+                const isBurst = Math.random() > 0.94;
+                const count = isBurst ? 80 : 2;
                 
                 for(let i=0; i<count; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = isBurst ? Math.random()*5 : Math.random()*0.6;
+                    const speed = isBurst ? Math.random()*6 : Math.random()*0.8;
                     particles.push(new Particle(x, y, color, speed, angle, 0.98, 0.02, 0.015, 1.2));
                 }
             }
         }
 
-        igniteBtn.addEventListener('click', () => {
-            if(isCelebrating) return;
-            isCelebrating = true;
-            igniteBtn.classList.add('launched');
-            document.getElementById('hint').style.opacity = '0';
-            
+        // Automatic Start Logic
+        window.onload = () => {
             setTimeout(() => {
-                rocket = new Rocket(width / 2);
-            }, 300);
-        });
+                rocket = new Rocket();
+            }, 800); // Slight delay for cinematic feel
+        };
 
         function loop() {
             ctx.fillStyle = 'rgba(1, 2, 8, 0.22)';
