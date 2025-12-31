@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 Celebration - Nishu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Great+Vibes&family=Montserrat:wght@100;400;700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #010208;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Deep Cinematic Atmosphere */
+        .sky-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 100%, #1e1b4b 0%, #0c0a1f 45%, #010208 100%);
+            z-index: 1;
+        }
+
+        canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Vivid Typography Styles */
+        #wish-box {
+            position: absolute;
+            top: 40%;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 2.5s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 25;
+        }
+
+        #wish-box.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* COLORFUL GRADIENT TEXT */
+        .vivid-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            background: linear-gradient(
+                90deg, 
+                #ff3366 0%, 
+                #33ffcc 25%, 
+                #ffcc33 50%, 
+                #9933ff 75%, 
+                #33ccff 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: moveGradient 4s linear infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+        }
+
+        @keyframes moveGradient {
+            to { background-position: 200% center; }
+        }
+
+        .year-2026 {
+            font-family: 'Cinzel', serif;
+            font-size: 7.5rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 0.9;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            margin-top: 10px;
+        }
+
+        .signature {
+            font-family: 'Great Vibes', cursive;
+            color: #ffd700;
+            font-size: 3.5rem;
+            margin-top: 15px;
+            opacity: 0;
+            transition: all 2s ease 1s;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.7));
+        }
+
+        #wish-box.visible .signature {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .year-2026 { font-size: 5rem; }
+            .vivid-title { letter-spacing: 0.3em; font-size: 0.9rem; }
+            .signature { font-size: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sky-bg"></div>
+    <canvas id="canvas"></canvas>
+
+    <div id="wish-box">
+        <p class="vivid-title text-sm md:text-xl">Happy New Year</p>
+        <h1 class="year-2026">2026</h1>
+        <p class="signature">from Nishu</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const wishBox = document.getElementById('wish-box');
+
+        let width, height;
+        let particles = [];
+        let rocket = null;
+        let flareMode = false;
+
+        const VIVID_COLORS = ['#FF3366', '#33FFCC', '#FFCC33', '#9933FF', '#33CCFF', '#FF9933', '#FFFFFF'];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color, speed, angle, friction, gravity, decay, size = 1.8) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.friction = friction;
+                this.gravity = gravity;
+                this.life = 1;
+                this.decay = decay;
+                this.size = size;
+                this.twinkle = Math.random() > 0.7;
+            }
+            update() {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                let alpha = this.life;
+                if(this.twinkle) alpha *= (0.4 + Math.abs(Math.sin(Date.now() * 0.015)) * 0.6);
+                ctx.globalAlpha = Math.max(0, alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class Rocket {
+            constructor() {
+                this.x = width / 2;
+                this.y = height;
+                this.targetX = width / 2;
+                this.targetY = height / 2;
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                // Move to middle in approx 1.5 seconds
+                this.steps = 70; 
+                this.vx = dx / this.steps;
+                this.vy = dy / this.steps;
+                this.stepCount = 0;
+                this.exploded = false;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.stepCount++;
+
+                // Fire trail with colors
+                for(let i=0; i<4; i++) {
+                    const c = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
+                    particles.push(new Particle(this.x, this.y, c, Math.random()*2, Math.PI/2, 0.98, 0.05, 0.05, 1.2));
+                }
+
+                if (this.stepCount >= this.steps && !this.exploded) this.explode();
+            }
+            explode() {
+                this.exploded = true;
+                
+                // MULTI-COLOR SPARKLE BLAST IN MIDDLE
+                for(let j=0; j<5; j++) {
+                    setTimeout(() => {
+                        const count = 220;
+                        for(let i=0; i<count; i++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const speed = Math.random() * (15 - j*2) + 3;
+                            const pColor = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
+                            particles.push(new Particle(this.x, this.y, pColor, speed, angle, 0.94, 0.1, 0.005 + Math.random()*0.005, 1.6));
+                        }
+                    }, j * 250);
+                }
+                
+                setTimeout(() => {
+                    wishBox.classList.add('visible');
+                    // Start Fire Glares after name is revealed
+                    setTimeout(() => { flareMode = true; }, 1500);
+                }, 800);
+            }
+            draw() {
+                if(this.exploded) return;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI*2);
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#fff';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createAmbientFlares() {
+            if(particles.length < 4500) {
+                const x = Math.random() * width;
+                const y = Math.random() * (height * 0.8);
+                const color = VIVID_COLORS[Math.floor(Math.random() * VIVID_COLORS.length)];
+                const isBurst = Math.random() > 0.94;
+                const count = isBurst ? 80 : 2;
+                
+                for(let i=0; i<count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = isBurst ? Math.random()*6 : Math.random()*0.8;
+                    particles.push(new Particle(x, y, color, speed, angle, 0.98, 0.02, 0.015, 1.2));
+                }
+            }
+        }
+
+        // Automatic Start Logic
+        window.onload = () => {
+            setTimeout(() => {
+                rocket = new Rocket();
+            }, 800); // Slight delay for cinematic feel
+        };
+
+        function loop() {
+            ctx.fillStyle = 'rgba(1, 2, 8, 0.22)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.globalCompositeOperation = 'lighter';
+
+            if (rocket) {
+                rocket.update();
+                rocket.draw();
+            }
+
+            for(let i=particles.length-1; i>=0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) particles.splice(i, 1);
+            }
+
+            if (flareMode) createAmbientFlares();
+
+            ctx.globalCompositeOperation = 'source-over';
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
+
